@@ -2,7 +2,7 @@ import java.util.*;
 
 public class DijkstraSearch<V> implements Search<V> {
     private Map<Vertex<V>, Double> distances = new HashMap<>();
-    private Map<Vertex<V>, Vertex<V>> paths = new HashMap<>();
+    private Map<Vertex<V>, Vertex<V>> previous = new HashMap<>();
     private WeightedGraph<V> graph;
 
     public DijkstraSearch(WeightedGraph<V> graph) {
@@ -11,25 +11,33 @@ public class DijkstraSearch<V> implements Search<V> {
 
     @Override
     public void search(Vertex<V> start) {
-        PriorityQueue<Vertex<V>> priorityQueue = new PriorityQueue<>(Comparator.comparing(distances::get));
-        distances.put(start, 0.0);
-        paths.put(start, null);
-        priorityQueue.add(start);
+        Queue<Vertex<V>> currentQueue = new LinkedList<>();
+        Queue<Vertex<V>> nextQueue = new LinkedList<>();
 
-        while (!priorityQueue.isEmpty()) {
-            Vertex<V> current = priorityQueue.poll();
+        distances.put(start, 0.0);
+        currentQueue.add(start);
+        previous.put(start, null);
+
+        while (!currentQueue.isEmpty()) {
+            Vertex<V> current = currentQueue.poll();
             double currentDistance = distances.get(current);
 
-            for (Edge<V> edge : graph.getEdges(current)) {
-                Vertex<V> adjacent = edge.getDest();
-                double weight = edge.getWeight();
-                double distanceThroughU = currentDistance + weight;
+            for (Map.Entry<Vertex<V>, Double> entry : current.getAdjacentVertices().entrySet()) {
+                Vertex<V> neighbor = entry.getKey();
+                double weight = entry.getValue();
+                double newDistance = currentDistance + weight;
 
-                if (distanceThroughU < distances.getOrDefault(adjacent, Double.MAX_VALUE)) {
-                    distances.put(adjacent, distanceThroughU);
-                    paths.put(adjacent, current);
-                    priorityQueue.add(adjacent);
+                if (newDistance < distances.getOrDefault(neighbor, Double.MAX_VALUE)) {
+                    distances.put(neighbor, newDistance);
+                    previous.put(neighbor, current);
+                    nextQueue.add(neighbor);
                 }
+            }
+
+            if (currentQueue.isEmpty()) {
+                Queue<Vertex<V>> temp = currentQueue;
+                currentQueue = nextQueue;
+                nextQueue = temp;
             }
         }
     }
@@ -41,6 +49,6 @@ public class DijkstraSearch<V> implements Search<V> {
 
     @Override
     public Map<Vertex<V>, Vertex<V>> getPaths() {
-        return paths;
+        return previous;
     }
 }

@@ -1,42 +1,47 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
-        Vertex<String> v1 = new Vertex<>("A");
-        Vertex<String> v2 = new Vertex<>("B");
-        Vertex<String> v3 = new Vertex<>("C");
-        Vertex<String> v4 = new Vertex<>("D");
-
         WeightedGraph<String> graph = new WeightedGraph<>();
-        graph.addVertex(v1);
-        graph.addVertex(v2);
-        graph.addVertex(v3);
-        graph.addVertex(v4);
 
-        graph.addEdge(v1, v2, 1);
-        graph.addEdge(v2, v3, 2);
-        graph.addEdge(v3, v4, 3);
-        graph.addEdge(v1, v3, 4);
+        String[] cities = {"Almaty", "Astana", "Shymkent", "Atyrau", "Kostanay", "Kyzylorda"};
+        for (String city : cities) {
+            graph.addVertex(city);
+        }
 
-        BiDirectionalBreadthFirstSearch<String> biDirectionalBFS = new BiDirectionalBreadthFirstSearch<>(graph);
-        biDirectionalBFS.search(v1, v4);
-        System.out.println("Bi-directional BFS Paths: " + biDirectionalBFS.getPaths());
+        graph.addEdge("Almaty", "Astana", 2.0);
+        graph.addEdge("Shymkent", "Atyrau", 3.0);
+        graph.addEdge("Atyrau", "Astana", 1.0);
+        graph.addEdge("Almaty", "Shymkent", 4.0);
+        graph.addEdge("Shymkent", "Astana", 2.5);
+        graph.addEdge("Astana", "Kostanay", 1.5);
+        graph.addEdge("Shymkent", "Kyzylorda", 1.0);
 
+        System.out.println("BFS from Almaty to Kyzylorda:");
+        BreadthFirstSearch<String> bfs = new BreadthFirstSearch<>(graph);
+        bfs.search(graph.getVertex("Almaty"), graph.getVertex("Kyzylorda"));
+        printPath(bfs.getPaths(), graph.getVertex("Almaty"), graph.getVertex("Kyzylorda"));
+
+        System.out.println("\nDijkstra's from Almaty to Kyzylorda:");
         DijkstraSearch<String> dijkstra = new DijkstraSearch<>(graph);
-        dijkstra.search(v1);
-        System.out.println("Dijkstra Paths: " + getPathString(dijkstra.getPaths(), v1));
+        dijkstra.search(graph.getVertex("Almaty"), graph.getVertex("Kyzylorda"));
+        printPath(dijkstra.getPaths(), graph.getVertex("Almaty"), graph.getVertex("Kyzylorda"));
     }
 
-    private static <V> String getPathString(Map<Vertex<V>, Vertex<V>> paths, Vertex<V> start) {
-        Map<Vertex<V>, List<Vertex<V>>> pathStrings = new HashMap<>();
-        for (Vertex<V> key : paths.keySet()) {
-            List<Vertex<V>> path = new ArrayList<>();
-            for (Vertex<V> at = key; at != null; at = paths.get(at)) {
-                path.add(at);
-            }
-            Collections.reverse(path);
-            pathStrings.put(key, path);
+    public static void printPath(Map<Vertex<String>, Vertex<String>> paths, Vertex<String> start, Vertex<String> target) {
+        if (paths == null || start == null || target == null || !paths.containsKey(target)) {
+            System.out.println("No path found or invalid input.");
+            return;
         }
-        return pathStrings.toString();
+
+        List<String> path = new ArrayList<>();
+        for (Vertex<String> at = target; at != null; at = paths.get(at)) {
+            path.add(at.getData());
+        }
+        Collections.reverse(path);
+        System.out.println("Path: " + String.join(" -> ", path));
     }
 }

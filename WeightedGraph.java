@@ -1,39 +1,36 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 public class WeightedGraph<V> {
-    private Map<Vertex<V>, List<Edge<V>>> adjacencyList;
+    private Map<V, Vertex<V>> vertices;
 
     public WeightedGraph() {
-        this.adjacencyList = new HashMap<>();
+        this.vertices = new HashMap<>();
     }
 
-    public void addVertex(Vertex<V> vertex) {
-        adjacencyList.putIfAbsent(vertex, new ArrayList<>());
-    }
-    public Map<Vertex<V>, Double> getAdjacentVertices(Vertex<V> vertex) {
-        Map<Vertex<V>, Double> map = new HashMap<>();
-        if (adjacencyList.containsKey(vertex)) {
-            for (Edge<V> edge : adjacencyList.get(vertex)) {
-                map.put(edge.getDest(), edge.getWeight());
-            }
+    public void addVertex(V data) {
+        if (!vertices.containsKey(data)) {
+            vertices.put(data, new Vertex<>(data));
         }
-        return map;
-    }
-    public void addEdge(Vertex<V> source, Vertex<V> dest, double weight) {
-        adjacencyList.get(source).add(new Edge<>(source, dest, weight));
-        source.addAdjacentVertex(dest, weight);
-        adjacencyList.get(dest).add(new Edge<>(dest, source, weight));
-        dest.addAdjacentVertex(source, weight);
     }
 
-    public List<Edge<V>> getEdges(Vertex<V> vertex) {
-        return adjacencyList.getOrDefault(vertex, new ArrayList<>());
+    public Vertex<V> getVertex(V data) {
+        return vertices.get(data);
     }
 
     public Set<Vertex<V>> getVertices() {
-        return adjacencyList.keySet();
+        return new HashSet<>(vertices.values());
+    }
+
+
+    public void addEdge(V fromData, V toData, double weight) {
+        Vertex<V> fromVertex = vertices.get(fromData);
+        Vertex<V> toVertex = vertices.get(toData);
+
+        if (fromVertex == null || toVertex == null) {
+            throw new IllegalArgumentException("One or both vertices not found");
+        }
+
+        fromVertex.addAdjacentVertex(toVertex, weight);
+        toVertex.addAdjacentVertex(fromVertex, weight); // Assuming the graph is undirected
     }
 }

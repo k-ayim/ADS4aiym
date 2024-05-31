@@ -4,34 +4,31 @@ import java.util.Map;
 public class Vertex<V> {
     private V data;
     private Map<Vertex<V>, Double> adjacentVertices;
+    private boolean visited;
 
     public Vertex(V data) {
         this.data = data;
         this.adjacentVertices = new HashMap<>();
-    }
-
-    public void addAdjacentVertex(Vertex<V> destination, double weight) {
-        adjacentVertices.put(destination, weight);
+        this.visited = false;
     }
 
     public V getData() {
         return data;
     }
 
+    public void addAdjacentVertex(Vertex<V> destination, double weight) {
+        adjacentVertices.put(destination, weight);
+    }
+
     public Map<Vertex<V>, Double> getAdjacentVertices() {
         return adjacentVertices;
     }
 
-    @Override
-    public int hashCode() {
-        return data.hashCode();
+    public boolean isVisited() {
+        return visited;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Vertex<?> vertex = (Vertex<?>) obj;
-        return data.equals(vertex.data);
+    public void setVisited(boolean visited) {
+        this.visited = visited;
     }
 }
